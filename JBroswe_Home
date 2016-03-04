@@ -1,0 +1,269 @@
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+//import javax.swing.text.html.parser.Parser;
+//import javax.swing.text.html.parser.DocumentParser;
+//import java.sql.Array;
+//import java.time.LocalDate;
+import java.util.ArrayList;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+//import java.util.Arrays;
+import java.util.EmptyStackException;
+import javax.swing.JCheckBox;
+//import javax.swing.text.html.parser.DTD;
+import org.jsoup.Jsoup;
+import org.jsoup.parser.HtmlTreeBuilder;
+import org.jsoup.parser.Parser;
+import org.jsoup.safety.Cleaner;
+import org.jsoup.safety.Whitelist;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Permission;
+import java.security.cert.CertStore;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ *
+ * @author nickm
+ */
+public class URLFind extends JFrame implements ActionListener 
+{
+private JFrame JDisplay;
+private JLabel lblContent;
+private String URL;
+//private int entrynum=0;
+private String http="https://";
+
+private JLabel address;
+private JTextField txtURL;
+private JButton btngo;
+private JButton btnback;
+private JButton btnforward;
+private boolean bstack;
+private boolean fstack;
+private JCheckBox SLO;
+  
+    
+  
+    //ArrayList to store HTML content
+    ArrayList contents=new ArrayList<>();
+      
+    // Get methods
+    public String getURL()
+    {
+        return URL;
+    }
+
+   
+    //set constants
+    private final int HEIGHT=200;
+    private final int WIDTH=275;
+    
+private	String entry="Type a Web Address Here !";
+
+    public URLFind()
+    {
+         
+    super("Internet Browser");
+       
+   
+    // set size of frame
+	setSize(WIDTH, HEIGHT);
+        
+        //Make X close the program
+	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	this.setResizable(false);
+      
+        //Set layout type
+	setLayout(new FlowLayout());
+       
+        //Create and display second frame
+      // JDisplay=new JFrame("Internet Browser");
+       
+    //Setup Address label
+    address= new JLabel("Address: ");
+    add(address); 
+   
+   // Create and Add TextField Object to Frame
+    txtURL=new JTextField(entry,15);
+    //Highlight text
+    txtURL.selectAll();
+    //Assign Inputed text to variable (URL) 
+    add(txtURL);
+    
+   //Create / Add Connect Button
+   btngo= new JButton("GO");
+   btngo.setForeground(Color.green);
+   btngo.setToolTipText("Connect to a Web page");
+   Font myFont = new Font("Arial", Font.BOLD | Font.ITALIC, 15);
+     btngo.setFont(myFont);
+   btngo.addActionListener(this); 
+  
+   //Create ****lantent back and forward buttons
+   btnback=new JButton("Back");
+   btnback.setToolTipText("This Feature is not yet available");
+   add(btnback);
+   
+    add(btngo);
+    
+   //Create checkbox to allow user to change the language
+    SLO=new JCheckBox("Slovensko");
+    SLO.setToolTipText("Change browser language to Slovenian ");
+    
+  
+   //add forward button
+   btnforward=new JButton("Forward");
+   btnforward.setToolTipText("Coming Soon");
+  // btnforward.addActionListener(this);
+   add(btnforward);
+   add(SLO);
+   
+   
+//Make the Frame Visible
+   setVisible(true);
+    
+}
+   
+ // Actions to happen when Connect button (click)occurs
+@Override
+public void actionPerformed(ActionEvent e)
+{ 
+ String www="www.";
+ String webaddress="";
+ String content="";
+ 
+       
+    if(SLO.isSelected())
+    {
+        btnback.setText("Nazaj");
+        btnforward.setText("Naprej");
+        btngo.setText("Najdit");
+        
+        
+    }else
+    {
+        btnback.setText("Back");
+        btnforward.setText("Forward");
+        btngo.setText("GO");
+    }
+    
+    
+   //Assign a Varible to the input of the JTextField 
+    URL=txtURL.getText();
+    //What if user types www.example.com
+        //https://www.www.example.com
+   if(URL.contains(http)||URL.contains("http://"))
+   {
+       http="";
+   }
+     if(URL.contains(www))
+    {
+        www="";
+    }
+    
+    if(URL.equals(entry))
+    {
+        URL="GOOGLE.com";
+    }
+    //Create a larger String to bring it all together
+    //StringBuilder is more efficent
+    StringBuilder b=new StringBuilder();
+    b.append(http);
+    b.append(www);
+    b.append(URL);
+   
+    
+   //  System.out.println(webaddress);
+ 
+    // Create URL object to connect to a particular webpage using URL variable
+        try
+       {
+       // Create URL and URLConnection objects to make a connection with a page    
+       URL myURL=new URL(b.toString());
+        URLConnection myURLConnection = myURL.openConnection();
+           Permission t= myURLConnection.getPermission(); 
+           t.checkGuard(myURLConnection);
+        //Use a large number to set Timeout time
+            myURLConnection.setReadTimeout(999999999);
+             myURLConnection.connect();
+             
+      //CertStore CS=new CertStore();
+        
+        JOptionPane.showMessageDialog(null,"Connected to: "+b.toString());
+    
+        t.checkGuard(content);
+         //   Read from webpage         
+          BufferedReader in = new BufferedReader(new InputStreamReader(myURL.openStream()));
+       // While loop reads every line of HTML stores it in a variable and then closes the reader
+          Path filepath=Paths.get("TEST.html");
+          BufferedWriter write = new BufferedWriter(new FileWriter(filepath.toFile()));
+      
+        while ((content = in.readLine()) != null)
+        {
+            write.write(content);
+            write.newLine();
+            contents.add(content);
+            System.out.println(content); 
+            contents.add("\n");
+        }
+        
+       write.close();
+        System.out.println("Done!!");
+       System.out.println();
+       System.out.println(contents.toString());
+      //System.out.println(content);
+     
+        //Whitelist WL=new Whitelist();
+        
+   // HtmlTreeBuilder H=new HtmlTreeBuilder();
+    
+       //  Cleaner C=new Cleaner(WL);
+            
+         //Parser p=new Parser(H);
+         
+       //Parse the String of HTML into Document object
+       //p.parseInput(contents.toString(),URL);
+       contents.removeAll(contents);
+    }catch(MalformedURLException q)
+    {
+    JOptionPane.showMessageDialog(null,q.getMessage());
+         
+    }catch(EmptyStackException |    IOException g)
+    {
+      JOptionPane.showMessageDialog(null,g.getMessage());
+      txtURL.setText(entry);
+      txtURL.selectAll();
+      
+     }catch(HeadlessException x)
+     {
+      JOptionPane.showMessageDialog(null, x.getMessage());
+         
+     }catch(NullPointerException g)
+    {
+        JOptionPane.showMessageDialog(null,"null");  
+    }catch(Exception z)
+    {
+        JOptionPane.showMessageDialog(null,z.toString());
+       
+    }
+   }      
+}
